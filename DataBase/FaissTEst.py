@@ -1,26 +1,39 @@
-import faiss
-import numpy as np
+
 from huggingface_hub import snapshot_download
 
 from transformers import AutoTokenizer, AutoModel
+import os
+import torch
+
+# 限制 PyTorch 线程数，避免多线程冲突
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+torch.set_num_threads(1)
 
 # 指定本地模型路径
-model_path = "./models/chatglm2-6b-int4"
+model_path = "./models/chatglm2-6b"
 snapshot_download(
-    repo_id="THUDM/chatglm2-6b-int4",
-    local_dir=model_path,
-    endpoint="https://hf-mirror.com"  # 国内镜像源
+    repo_id="THUDM/chatglm2-6b",
+    local_dir="./models/chatglm2-6b",
+    endpoint="https://hf-mirror.com"
 )
 import sys
-sys.path.append("./models/chatglm2-6b-int4")  # 指定本地模型路径
+sys.path.append("./models/chatglm2-6b")  # 指定本地模型路径
 # 加载 tokenizer
-tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=False)
+tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
 
-# 加载模型到 CPU（使用 float32 以保证兼容性）
-model = AutoModel.from_pretrained(model_path, trust_remote_code=False).float().to("cpu")
+# 强制使用 float32 以避免不兼容的数据类型
+model = AutoModel.from_pretrained(
+    model_path,
+    trust_remote_code=True,
+    torch_dtype=torch.float16,  # 使用更低的精度
+    low_cpu_mem_usage=True  # 启用低内存模式
+)
 
-# 设置模型为评估模式
-model = model.eval()
+
+# 将模型移动到 CPU
+model = model.to("cpu").eval()
+
 
 while True:
     query = input("User: ")
