@@ -4,6 +4,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import Runnable
 
 import DataClear
+from DataBase import initeChroma
 from selfllm.xinghuoLLm import XinghuoLLm
 from test.xinghuotest import xinghuoApi
 # 配置星火模型的API URL和API密钥
@@ -24,6 +25,7 @@ class XinghuoRunnable(Runnable):
         return response
 
 if __name__ == '__main__':
+    initeChroma.init()
     # 创建自定义的 XinghuoLLM 实例
     xinhuo_llm= XinghuoLLm(api_url=api_url,api_token=api_token)
     # 创建一个提示模板
@@ -55,6 +57,10 @@ if __name__ == '__main__':
     # 使用 Xinghuo API 获取响应
     # xinghuo_response = chain.invoke({"input_text": user_input})
     xinghuo_response=DataClear.jsondata
+    initeChroma.chroma_save_embedding(xinghuo_response)
+    result= initeChroma.chroma_query_embedding("赛亚人",2)
+    print("向量查询", result)
 
-    print("xinghuo API 的响应:", xinghuo_response)
-
+# if __name__ == '__main__':
+#     result = initeChroma.chroma_query_embedding("第七宇宙的赛亚人", 2, '孙悟空')
+#     print("向量查询", result)
