@@ -2,7 +2,7 @@ import asyncio
 import cmd
 import sys
 import main
-from DataBase import initeChroma
+from DB import IChroma
 from TTS.xhTTs import tts_websocket
 
 
@@ -52,5 +52,6 @@ class SimpleCLI(cmd.Cmd):
         print(f"load html is {arg}")
 
 if __name__ == "__main__":
-    initeChroma.init()
+    IChroma.create_client()
+    IChroma.init()
     SimpleCLI().cmdloop()

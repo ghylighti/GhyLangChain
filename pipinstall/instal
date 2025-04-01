@@ -1,0 +1,4 @@
+! pip install docx2txt
+! pip install pypdf
+! pip install nltk
+pip install hanlp

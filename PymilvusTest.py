@@ -2,7 +2,7 @@
 from sentence_transformers import SentenceTransformer
 
 import DataClear
-from DataBase import Milvus
+from DB import Milvus
 
 xinghuo_response=DataClear.jsondata
 print("xinghuo API 的响应1:", xinghuo_response)

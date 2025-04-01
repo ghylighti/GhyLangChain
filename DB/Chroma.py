@@ -36,7 +36,7 @@ collection.add(
 
 
 # 查询文本并转换为向量
-query_text = "chroma 好用吗?"
+query_text = "不好用"
 query_vector = embed([query_text])[0]
 
 # 使用 Chroma 进行相似度查询
