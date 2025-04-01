@@ -5,6 +5,8 @@ import hmac
 import time
 import asyncio
 import websockets
+import pygame
+import io
 from urllib.parse import urlparse, urlencode
 
 # 生成请求签名
@@ -42,69 +44,54 @@ def get_ws_auth_url():
     return ws_url
 
 ## WebSocket 连接函数
-async def tts_websocket():
+async def tts_websocket(ans):
     ws_url = get_ws_auth_url()
-    audio_data = b""  # 用于存储音频数据
 
-    async with websockets.connect(ws_url) as websocket:
+    pygame.mixer.init()  # 初始化 Pygame 音频
+
+    async with websockets.connect(ws_url,close_timeout=30) as websocket:
         message = {
-            "common": {
-                "app_id": "1690d84f"  # 替换为您的 APPID
-            },
+            "common": {"app_id": "1690d84f"},
             "business": {
-                "aue": "lame",  # 音频编码为 MP3
-                "sfl": 1,       # 开启流式返回
-                "auf": "audio/L16;rate=16000",  # 音频采样率为 16k
-                "vcn": "qianhui",  # 发音人
-                "speed": 50,       # 语速
-                "volume": 50,      # 音量
-                "pitch": 50,       # 音高
-                "bgs": 0,          # 无背景音
-                "tte": "UTF8",      # 文本编码格式
-                "reg": "2",        # 英文发音方式
-                "rdn": "0"         # 数字发音方式
+                "aue": "lame", "sfl": 1, "auf": "audio/L16;rate=16000",
+                "vcn": "qianhui", "speed": 50, "volume": 50,
+                "pitch": 50, "bgs": 0, "tte": "UTF8",
+                "reg": "2", "rdn": "0"
             },
             "data": {
                 "status": 2,
-                "text": base64.b64encode("你好，欢迎使用讯飞语音合成！".encode()).decode()  # 进行Base64编码
+                "text": base64.b64encode(str(ans).encode()).decode()
             }
         }
 
         await websocket.send(json.dumps(message))
 
+        mp3_data = io.BytesIO()
+
         while True:
-            # 接收响应
             response = await websocket.recv()
             response_data = json.loads(response)
 
-            # 检查返回数据
             if response_data.get("code") != 0:
                 print(f"错误: {response_data.get('message')}")
                 break
 
-            # 处理音频数据
             if "data" in response_data and response_data["data"] is not None:
                 audio = response_data["data"].get("audio")
                 if audio:
-                    audio_data += base64.b64decode(audio)
+                    mp3_data.write(base64.b64decode(audio))
 
-                # 合成状态检查
                 status = response_data["data"].get("status")
-                if status == 2:  # 合成完成
-                    print("音频合成完成，保存音频文件...")
-                    with open("tts_output.mp3", "wb") as audio_file:
-                        audio_file.write(audio_data)
-                    print("音频文件已保存为 tts_output.mp3")
+                if status == 2:  # 语音合成完成
                     break
-                elif status == 1:  # 合成中
-                    ced = response_data["data"].get("ced", "0")
-                    print(f"合成进度: {ced} 字节")
-                else:
-                    print("未知状态")
-                    break
-            else:
-                print("接收到空数据或无音频数据")
-                break
 
-# 运行 WebSocket 连接
-asyncio.run(tts_websocket())
+        # 播放音频
+        mp3_data.seek(0)
+        pygame.mixer.music.load(mp3_data, "mp3")
+        pygame.mixer.music.play()
+
+        while pygame.mixer.music.get_busy():
+            await asyncio.sleep(0.1)  # 让事件循环继续执行
+
+
+# asyncio.run(tts_websocket())
