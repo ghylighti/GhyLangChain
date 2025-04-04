@@ -6,12 +6,11 @@ import time
 import asyncio
 import websockets
 from urllib.parse import urlparse, urlencode
-
+from TTS import  PyGame
+from Const import Const
 # 生成请求签名
 def get_ws_auth_url():
-    app_id = "1690d84f"  # 替换为您的 APPID
-    api_key = "dc7ea49d5abe67227218ce8a44c04063"  # 替换为您的 APIKey
-    api_secret = "NDE1MjQzZWMzYTk2ODExMjRlODQ5N2Yw"  # 替换为您的 APISecret
+
 
     # 计算时间戳和GMT时间
     now = int(time.time())
@@ -23,11 +22,11 @@ def get_ws_auth_url():
     signature_origin = f"host: {host}\ndate: {date}\n{request_line}"
 
     # 使用 HMAC-SHA256 生成签名
-    signature_sha = hmac.new(api_secret.encode(), signature_origin.encode(), hashlib.sha256).digest()
+    signature_sha = hmac.new(Const.api_secret.encode(), signature_origin.encode(), hashlib.sha256).digest()
     signature = base64.b64encode(signature_sha).decode()
 
     # 构建 authorization 参数
-    authorization_origin = f'api_key="{api_key}",algorithm="hmac-sha256",headers="host date request-line",signature="{signature}"'
+    authorization_origin = f'api_key="{Const.api_key}",algorithm="hmac-sha256",headers="host date request-line",signature="{signature}"'
     authorization = base64.b64encode(authorization_origin.encode()).decode()
 
     # 构建查询参数
@@ -107,4 +106,6 @@ async def tts_websocket(text):
                 break
 
 # 运行 WebSocket 连接
+# PyGame.init()
 # asyncio.run(tts_websocket("大家好，我是孙悟空"))
+# PyGame.play()

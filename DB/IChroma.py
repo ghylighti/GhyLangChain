@@ -22,6 +22,9 @@ def create_client():
 def clean_db():
     try:
         client.delete_collection(dbname)
+        print(f"清除集合{dbname}")
+        init()
+        print(f"重新创建该集合{dbname}")
     except Exception as e:
         print(f"不存在集合{dbname}")
 
@@ -37,7 +40,6 @@ def init():
     except UniqueConstraintError as e:
         print("该集合已经存在，直接使用")
         collection= client.get_collection(name=dbname)
-
 
     # 加载模型和 tokenizer（可以选择Sentence-BERT模型或其他合适的模型）
     # model_name = "sentence-transformers/paraphrase-MiniLM-L6-v2"
@@ -64,6 +66,8 @@ def chroma_get_embedding(text):
 
 def chroma_save_embedding(data):
     character = data["主角姓名"]
+    book=data["作品名称"]
+    print(f"{character}=>>>{book}")
     # 向量化每个属性
     for key, value in data.items():
         for key_word in halp.split_word(value):
@@ -71,17 +75,18 @@ def chroma_save_embedding(data):
             collection.add(
                 embeddings=[Embedding.get_embedding(key_word)],  # 每个属性的单独向量
                 documents=[value],  # 存储该属性的文本
-                metadatas=[{"attribute": key, "character": character}],  # 元数据
+                metadatas=[{"attribute": key, "character":f"{book}_{character}"}],  # 元数据
                 ids=[id]  # 使用ID
             )
 
 
-def chroma_query_embedding(query_text, top=3):
+def chroma_query_embedding(query_text, top=3,character=None,book=None):
     query_embedding = Embedding.get_embedding(query_text)  # 这里修正：转换为 list
     results = collection.query(
         query_embeddings=[query_embedding],  # 这里修正：必须是 list 的 list
         n_results=top,  # 这里修正：不需要 query_texts
-        include = ["metadatas","documents"]  # 让结果包含存储的向量
+        include = ["metadatas","documents"],  # 让结果包含存储的向量
+        where={"character": f"{book}_{character}"}
     )
     # results = collection.get(include=["documents", "metadatas"])
     # for doc, meta in zip(results["documents"], results["metadatas"]):

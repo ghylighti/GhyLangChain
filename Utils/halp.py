@@ -3,7 +3,7 @@ import re
 hanlp = hanlp.load(hanlp.pretrained.tok.COARSE_ELECTRA_SMALL_ZH)
 
 def split_word(text):
-    word_list=hanlp(text)
+    word_list=hanlp(str(text))
     filtered_words = list(filter(lambda x: x not in '，、。！？；：', word_list))
     return filtered_words
 # #去除标点符号

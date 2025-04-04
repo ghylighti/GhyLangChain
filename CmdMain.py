@@ -1,22 +1,25 @@
 import asyncio
 import cmd
-import sys
+import time
 import main
 from DB import IChroma
 from TTS.xhTTs import tts_websocket
+from TTS import PyGame
 
 
 class SimpleCLI(cmd.Cmd):
     prompt = "CLI> "  # 设置命令提示符
     intro = "Welcome to the simple CLI. Type help or ? to list commands."
-
+    role=None
+    book=None
     def do_hello(self, arg):
         "Say hello with an optional name: hello [name]"
         if arg:
             print(f"Hello, {arg}!")
         else:
             print("Hello!")
-
+    def do_clean(self,arg):
+        IChroma.clean_db()
     def do_exit(self, arg):
         "Exit the CLI"
         print("Goodbye!")
@@ -41,17 +44,24 @@ class SimpleCLI(cmd.Cmd):
         "Handle Ctrl+D (EOF) to exit"
         return True
     #问答系统
-    def do_spk(self,arg):
-        str=main.test()
-        print(f"user input is {str['documents'][0]}")
-
-        asyncio.run(tts_websocket(str))
+    def do_spk(self, arg):
+        print(f"arg:{arg}==>role:{self.role}==>book:{self.book}")
+        result=main.query(arg,self.role,self.book)
+        ans=main.get_prompt(arg,result=result,role=self.role,book=self.book)
+        asyncio.run(tts_websocket(ans))
+        time.sleep(1)  # 等待 0.5 秒再播放，确保文件写入完成
+        PyGame.play()
         print(f"user question is {arg}")
     #加载知识库
     def do_load(self,arg):
+        main.load(arg)
         print(f"load html is {arg}")
-
+    def do_role(self,arg):
+        self.role=arg
+    def do_book(self,arg):
+        self.book=arg
 if __name__ == "__main__":
+    PyGame.init()
     IChroma.create_client()
     IChroma.init()
     SimpleCLI().cmdloop()
