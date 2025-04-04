@@ -32,7 +32,7 @@ def load(url):
     chain = XinghuoRunnable(prompt_template=prompt, llm=xinhuo_llm)
     # 使用 Xinghuo API 获取响应
     xinghuo_response = chain.invoke({"input_text": user_input})
-    content=DataClear.get_content(xinghuo_response)
+    content=DataClear.extract_first_json(xinghuo_response)
     # xinghuo_response = DataClear.jsondata
     IChroma.chroma_save_embedding(content)
 def query(ques,charset,book):

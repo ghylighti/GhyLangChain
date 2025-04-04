@@ -18,6 +18,25 @@ import re
 # """
 
 # jsondata=json.loads(data.strip().replace("```","").replace("json",""))
+#提取json内容。模型返回的东西不一定是标准的json
+def extract_first_json(text):
+    pattern = r'(\{.*?\})'  # 尝试匹配 JSON 对象
+    match_iter = re.finditer(pattern, text, re.DOTALL)
+
+    for match in match_iter:
+        json_str = match.group(1)
+        try:
+            return json.loads(
+                json_str.strip()
+                .replace("```", "")
+                .replace("json", "")
+                .replace("《","")
+                .replace("》","")
+
+                              )  # 解析成功就返回
+        except json.JSONDecodeError:
+            continue  # 如果解析失败就尝试下一个匹配
+    return None  # 没找到合法的 JSON
 
 def get_content(content):
     return json.loads(content.strip().replace("```", "").replace("json", ""))
