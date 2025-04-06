@@ -3,7 +3,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import Runnable
 import DataClear
 from DB import IChroma
-from Selfllm.XinghuoLLm import XinghuoLLm
+from Selfllm1.XinghuoLLm import XinghuoLLm
 from Loader import Loader
 from Const import Const, PromptTemp
 
