@@ -3,7 +3,7 @@ import cmd
 import time
 import Controller
 from DB import IChroma
-from TTS.xhTTs import tts_websocket
+from TTS.XhTTs import tts_websocket
 from TTS import PyGame
 
 
@@ -60,6 +60,8 @@ class SimpleCLI(cmd.Cmd):
         self.role=arg
     def do_book(self,arg):
         self.book=arg
+    def do_blist(self,arg):
+        IChroma.chroma_query_list()
 if __name__ == "__main__":
     PyGame.init()
     IChroma.create_client()

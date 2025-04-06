@@ -104,3 +104,4 @@ def chroma_query_embedding(query_text, top=3,character=None,book=None):
     return results
 
 
+
