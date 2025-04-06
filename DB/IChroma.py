@@ -7,7 +7,7 @@ import re
 from chromadb.errors import UniqueConstraintError
 from langsmith import expect
 
-from Utils import halp
+from Utils import halp, StringUtils
 from transformers import AutoModel, AutoTokenizer
 
 from DB import Embedding
@@ -83,12 +83,8 @@ def chroma_save_embedding(data):
 def get_role_book(data):
     character = data["主角姓名"]
     book = data["作品名称"]
-    return extract_book_name(book), character
-def extract_book_name(title):
-    match = re.search(r'《(.*?)》', title)
-    if match:
-        return match.group(1)
-    return title  # 没有书名号就返回原内容
+    return StringUtils.extract_book_name(book), StringUtils.delete_marks(character)
+
 
 def chroma_query_embedding(query_text, top=3,character=None,book=None):
     query_embedding = Embedding.get_embedding(query_text)  # 这里修正：转换为 list

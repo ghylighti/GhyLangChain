@@ -24,22 +24,9 @@ class SimpleCLI(cmd.Cmd):
         "Exit the CLI"
         print("Goodbye!")
         return True
-
     def do_echo(self, arg):
         "Echo the input: echo [message]"
         print(arg)
-
-    def do_add(self, arg):
-        "Add two numbers: add num1 num2"
-        try:
-            numbers = list(map(float, arg.split()))
-            if len(numbers) != 2:
-                print("Usage: add num1 num2")
-            else:
-                print(f"Result: {numbers[0] + numbers[1]}")
-        except ValueError:
-            print("Please enter valid numbers.")
-
     def do_EOF(self, arg):
         "Handle Ctrl+D (EOF) to exit"
         return True
@@ -60,8 +47,8 @@ class SimpleCLI(cmd.Cmd):
         self.role=arg
     def do_book(self,arg):
         self.book=arg
-    def do_blist(self,arg):
-        IChroma.chroma_query_list()
+    # def do_blist(self,arg):
+    #     IChroma.chroma_query_list()
 if __name__ == "__main__":
     PyGame.init()
     IChroma.create_client()
